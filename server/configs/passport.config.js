@@ -1,153 +1,310 @@
-import passportConfig from 'passport'
+// import passportConfig from 'passport'
+// import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
+// import { Strategy as GithubStrategy } from 'passport-github2'
+// import ENV_CONFIG from './env.config.js'
+// import userModel from '#server/models/user.model'
+// import { USER } from '#server/helpers/constants.helper'
+// import { auth_utils } from '#server/utils/auth.util'
+
+// // google
+// passportConfig.use(
+//   new GoogleStrategy(
+//     {
+//       clientID: ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_ID,
+//       clientSecret: ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_SECRET,
+//       callbackURL: ENV_CONFIG.PASSPORT.GOOGLE_CALLBACK_URL,
+//       scope: [`profile`, `email`],
+//     },
+//     async function (accessToken, refreshToken, profile, done) {
+//       const body = profile._json
+
+//       // check exists user
+//       let userExists = await userModel.findOne({
+//         email: body.email,
+//       })
+//       if (!userExists) {
+//         // hash password
+//         const hashedPassword = await auth_utils.hashPassword(String(body.sub))
+//         userExists = await userModel
+//           .create({
+//             email: body.email,
+//             password: hashedPassword,
+//             name: body.name,
+//             avatar: body.picture,
+//           })
+//           .then(async (value) => {
+//             return await userModel.findByIdAndUpdate(
+//               value._id,
+//               {
+//                 $push: {
+//                   providers: {
+//                     provider: USER.PROVIDER_TYPE.GOOGLE,
+//                     id: body.sub,
+//                   },
+//                 },
+//               },
+//               {
+//                 new: true,
+//               },
+//             )
+//           })
+//       }
+//       // check provider when user exists but not linked with google
+//       const provider = userExists.providers.find(
+//         (item) => item.provider === USER.PROVIDER_TYPE.GOOGLE,
+//       )
+//       if (!provider) {
+//         userExists = await userModel.findByIdAndUpdate(
+//           userExists._id,
+//           {
+//             $push: {
+//               providers: {
+//                 provider: USER.PROVIDER_TYPE.GOOGLE,
+//                 id: body.sub,
+//               },
+//             },
+//           },
+//           {
+//             new: true,
+//           },
+//         )
+//       }
+
+//       done(null, userExists)
+//     },
+//   ),
+// )
+// // github
+// passportConfig.use(
+//   new GithubStrategy(
+//     {
+//       clientID: ENV_CONFIG.PASSPORT.GITHUB_CLIENT_ID,
+//       clientSecret: ENV_CONFIG.PASSPORT.GITHUB_CLIENT_SECRET,
+//       callbackURL: ENV_CONFIG.PASSPORT.GITHUB_CALLBACK_URL,
+//       scope: ['user:email'],
+//     },
+//     async function (accessToken, refreshToken, profile, done) {
+//       const body = { ...profile._json, email: profile.emails[0].value }
+
+//       // // check exists user
+//       let userExists = await userModel.findOne({
+//         email: body.email,
+//       })
+//       if (!userExists) {
+//         // hash password
+//         const hashedPassword = await auth_utils.hashPassword(String(body.id))
+//         userExists = await userModel
+//           .create({
+//             email: body.email,
+//             password: hashedPassword,
+//             name: body.login,
+//             avatar: body.avatar_url,
+//           })
+//           .then(async (value) => {
+//             return await userModel.findByIdAndUpdate(
+//               value._id,
+//               {
+//                 $push: {
+//                   providers: {
+//                     provider: USER.PROVIDER_TYPE.GITHUB,
+//                     id: body.id,
+//                   },
+//                 },
+//               },
+//               {
+//                 new: true,
+//               },
+//             )
+//           })
+//       }
+//       // check provider when user exists but not linked with github
+//       const provider = userExists.providers.find(
+//         (item) => item.provider === USER.PROVIDER_TYPE.GITHUB,
+//       )
+//       if (!provider) {
+//         userExists = await userModel.findByIdAndUpdate(
+//           userExists._id,
+//           {
+//             $push: {
+//               providers: {
+//                 provider: USER.PROVIDER_TYPE.GITHUB,
+//                 id: body.id,
+//               },
+//             },
+//           },
+//           {
+//             new: true,
+//           },
+//         )
+//       }
+
+//       done(null, userExists)
+//     },
+//   ),
+// )
+
+// passportConfig.serializeUser(function (user, done) {
+//   done(null, user)
+// })
+// passportConfig.deserializeUser(function (user, done) {
+//   done(null, user)
+// })
+
+// export default passportConfig
+import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { Strategy as GithubStrategy } from 'passport-github2'
+
 import ENV_CONFIG from './env.config.js'
 import userModel from '#server/models/user.model'
 import { USER } from '#server/helpers/constants.helper'
 import { auth_utils } from '#server/utils/auth.util'
 
-// google
-passportConfig.use(
-  new GoogleStrategy(
-    {
-      clientID: ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_ID,
-      clientSecret: ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_SECRET,
-      callbackURL: ENV_CONFIG.PASSPORT.GOOGLE_CALLBACK_URL,
-      scope: [`profile`, `email`],
-    },
-    async function (accessToken, refreshToken, profile, done) {
-      const body = profile._json
+// =====================
+// DEBUG (xóa sau khi chạy OK)
+console.log('GOOGLE_CLIENT_ID:', ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_ID)
+console.log('GITHUB_CLIENT_ID:', ENV_CONFIG.PASSPORT.GITHUB_CLIENT_ID)
+// =====================
 
-      // check exists user
-      let userExists = await userModel.findOne({
-        email: body.email,
-      })
-      if (!userExists) {
-        // hash password
-        const hashedPassword = await auth_utils.hashPassword(String(body.sub))
-        userExists = await userModel
-          .create({
-            email: body.email,
-            password: hashedPassword,
-            name: body.name,
-            avatar: body.picture,
-          })
-          .then(async (value) => {
-            return await userModel.findByIdAndUpdate(
-              value._id,
-              {
-                $push: {
-                  providers: {
-                    provider: USER.PROVIDER_TYPE.GOOGLE,
-                    id: body.sub,
-                  },
-                },
-              },
-              {
-                new: true,
-              },
+// =====================
+// GOOGLE STRATEGY
+// =====================
+if (
+  ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_ID &&
+  ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_SECRET
+) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_ID,
+        clientSecret: ENV_CONFIG.PASSPORT.GOOGLE_CLIENT_SECRET,
+        callbackURL: ENV_CONFIG.PASSPORT.GOOGLE_CALLBACK_URL,
+        scope: ['profile', 'email'],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const body = profile._json
+
+          let userExists = await userModel.findOne({ email: body.email })
+
+          if (!userExists) {
+            const hashedPassword = await auth_utils.hashPassword(
+              String(body.sub),
             )
-          })
-      }
-      // check provider when user exists but not linked with google
-      const provider = userExists.providers.find(
-        (item) => item.provider === USER.PROVIDER_TYPE.GOOGLE,
-      )
-      if (!provider) {
-        userExists = await userModel.findByIdAndUpdate(
-          userExists._id,
-          {
-            $push: {
-              providers: {
+
+            userExists = await userModel.create({
+              email: body.email,
+              password: hashedPassword,
+              name: body.name,
+              avatar: body.picture,
+              providers: [
+                {
+                  provider: USER.PROVIDER_TYPE.GOOGLE,
+                  id: body.sub,
+                },
+              ],
+            })
+          } else {
+            const provider = userExists.providers.find(
+              (p) => p.provider === USER.PROVIDER_TYPE.GOOGLE,
+            )
+
+            if (!provider) {
+              userExists.providers.push({
                 provider: USER.PROVIDER_TYPE.GOOGLE,
                 id: body.sub,
-              },
-            },
-          },
-          {
-            new: true,
-          },
-        )
-      }
+              })
+              await userExists.save()
+            }
+          }
 
-      done(null, userExists)
-    },
-  ),
-)
-// github
-passportConfig.use(
-  new GithubStrategy(
-    {
-      clientID: ENV_CONFIG.PASSPORT.GITHUB_CLIENT_ID,
-      clientSecret: ENV_CONFIG.PASSPORT.GITHUB_CLIENT_SECRET,
-      callbackURL: ENV_CONFIG.PASSPORT.GITHUB_CALLBACK_URL,
-      scope: ['user:email'],
-    },
-    async function (accessToken, refreshToken, profile, done) {
-      const body = { ...profile._json, email: profile.emails[0].value }
+          return done(null, userExists)
+        } catch (error) {
+          return done(error)
+        }
+      },
+    ),
+  )
+}
 
-      // // check exists user
-      let userExists = await userModel.findOne({
-        email: body.email,
-      })
-      if (!userExists) {
-        // hash password
-        const hashedPassword = await auth_utils.hashPassword(String(body.id))
-        userExists = await userModel
-          .create({
-            email: body.email,
-            password: hashedPassword,
-            name: body.login,
-            avatar: body.avatar_url,
-          })
-          .then(async (value) => {
-            return await userModel.findByIdAndUpdate(
-              value._id,
-              {
-                $push: {
-                  providers: {
-                    provider: USER.PROVIDER_TYPE.GITHUB,
-                    id: body.id,
-                  },
-                },
-              },
-              {
-                new: true,
-              },
+// =====================
+// GITHUB STRATEGY
+// =====================
+if (
+  ENV_CONFIG.PASSPORT.GITHUB_CLIENT_ID &&
+  ENV_CONFIG.PASSPORT.GITHUB_CLIENT_SECRET
+) {
+  passport.use(
+    new GithubStrategy(
+      {
+        clientID: ENV_CONFIG.PASSPORT.GITHUB_CLIENT_ID,
+        clientSecret: ENV_CONFIG.PASSPORT.GITHUB_CLIENT_SECRET,
+        callbackURL: ENV_CONFIG.PASSPORT.GITHUB_CALLBACK_URL,
+        scope: ['user:email'],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const body = {
+            ...profile._json,
+            email: profile.emails?.[0]?.value,
+          }
+
+          let userExists = await userModel.findOne({ email: body.email })
+
+          if (!userExists) {
+            const hashedPassword = await auth_utils.hashPassword(
+              String(body.id),
             )
-          })
-      }
-      // check provider when user exists but not linked with github
-      const provider = userExists.providers.find(
-        (item) => item.provider === USER.PROVIDER_TYPE.GITHUB,
-      )
-      if (!provider) {
-        userExists = await userModel.findByIdAndUpdate(
-          userExists._id,
-          {
-            $push: {
-              providers: {
+
+            userExists = await userModel.create({
+              email: body.email,
+              password: hashedPassword,
+              name: body.login,
+              avatar: body.avatar_url,
+              providers: [
+                {
+                  provider: USER.PROVIDER_TYPE.GITHUB,
+                  id: body.id,
+                },
+              ],
+            })
+          } else {
+            const provider = userExists.providers.find(
+              (p) => p.provider === USER.PROVIDER_TYPE.GITHUB,
+            )
+
+            if (!provider) {
+              userExists.providers.push({
                 provider: USER.PROVIDER_TYPE.GITHUB,
                 id: body.id,
-              },
-            },
-          },
-          {
-            new: true,
-          },
-        )
-      }
+              })
+              await userExists.save()
+            }
+          }
 
-      done(null, userExists)
-    },
-  ),
-)
+          return done(null, userExists)
+        } catch (error) {
+          return done(error)
+        }
+      },
+    ),
+  )
+}
 
-passportConfig.serializeUser(function (user, done) {
-  done(null, user)
+// =====================
+// SERIALIZE
+// =====================
+passport.serializeUser((user, done) => {
+  done(null, user._id)
 })
-passportConfig.deserializeUser(function (user, done) {
-  done(null, user)
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await userModel.findById(id)
+    done(null, user)
+  } catch (err) {
+    done(err)
+  }
 })
 
-export default passportConfig
+export default passport

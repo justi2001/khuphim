@@ -21,6 +21,7 @@
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "mern-movie-comic-site": "file:..",
+    "mern-movie-site": "file:..",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
